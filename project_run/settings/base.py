@@ -28,6 +28,13 @@ DEBUG = True
 ALLOWED_HOSTS = ['*']
 
 
+# Website information
+
+SITE_TITLE = "Бегер"
+SITE_SLOGAN = "Бегер - бега трекер"
+SITE_CONTACTS = "Проспект Ленина, дом 1, г.Ленинск"
+
+
 # Application definition
 
 INSTALLED_APPS = [
