@@ -22,7 +22,7 @@ from rest_framework.routers import DefaultRouter
 
 from debug_toolbar.toolbar import debug_toolbar_urls
 
-from app_run.views import company_details_view, RunViewSet, UserViewSet
+from app_run.views import company_details_view, RunViewSet, UserViewSet, RunStartView, RunStopView
 
 router = DefaultRouter()
 router.register("runs", RunViewSet)
@@ -31,7 +31,9 @@ router.register("users", UserViewSet)
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/company_details/', company_details_view),
-    path("api/", include(router.urls))
+    path("api/", include(router.urls)),
+    path("api/runs/<int:run_id>/start/", RunStartView.as_view()),
+    path("api/runs/<int:run_id>/stop/", RunStopView.as_view()),
 ]
 
 if settings.DEBUG:
