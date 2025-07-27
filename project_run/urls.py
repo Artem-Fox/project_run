@@ -20,6 +20,8 @@ from django.conf.urls.static import static
 from django.conf import settings
 from rest_framework.routers import DefaultRouter
 
+from debug_toolbar.toolbar import debug_toolbar_urls
+
 from app_run.views import company_details_view, RunViewSet, UserViewSet
 
 router = DefaultRouter()
@@ -31,3 +33,6 @@ urlpatterns = [
     path('api/company_details/', company_details_view),
     path("api/", include(router.urls))
 ]
+
+if settings.DEBUG:
+    urlpatterns += debug_toolbar_urls()
