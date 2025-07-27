@@ -38,3 +38,6 @@ urlpatterns = [
 
 if settings.DEBUG:
     urlpatterns += debug_toolbar_urls()
+
+admin.site.site_header = "Панель администрирования"
+admin.site.index_title = "Django RUN"
