@@ -21,3 +21,16 @@ class Run(models.Model):
 
     def __str__(self):
         return f"{self.athlete.username} - {self.created_at.strftime('%d.%m.%Y %H:%M')}"
+
+
+class AthleteInfo(models.Model):
+    athlete = models.OneToOneField(User, on_delete=models.CASCADE, related_name="athlete_info", verbose_name="Атлет")
+    goals = models.TextField(blank=True, verbose_name="Цели")
+    weight = models.PositiveSmallIntegerField(blank=True, null=True, verbose_name="Вес")
+
+    class Meta:
+        verbose_name = "Информация об атлете"
+        verbose_name_plural = "Информация об атлетах"
+
+    def str(self):
+        return self.athlete.username
