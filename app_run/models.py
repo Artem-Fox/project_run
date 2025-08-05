@@ -24,7 +24,7 @@ class Run(models.Model):
 
 
 class AthleteInfo(models.Model):
-    athlete = models.OneToOneField(User, on_delete=models.CASCADE, related_name="athlete_info", verbose_name="Атлет")
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="athlete_info", verbose_name="Атлет")
     goals = models.TextField(blank=True, verbose_name="Цели")
     weight = models.PositiveSmallIntegerField(blank=True, null=True, verbose_name="Вес")
 
@@ -32,5 +32,5 @@ class AthleteInfo(models.Model):
         verbose_name = "Информация об атлете"
         verbose_name_plural = "Информация об атлетах"
 
-    def str(self):
-        return self.athlete.username
+    def __str__(self):
+        return self.user.username

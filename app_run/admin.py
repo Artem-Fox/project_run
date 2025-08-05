@@ -14,6 +14,6 @@ class RunAdmin(admin.ModelAdmin):
 
 @admin.register(AthleteInfo)
 class AthleteInfoAdmin(admin.ModelAdmin):
-    list_display = ["athlete", "goals", "weight"]
+    list_display = ["user", "goals", "weight"]
     list_per_page = 10
-    search_fields = ["athlete__username"]
+    search_fields = ["user__username"]
