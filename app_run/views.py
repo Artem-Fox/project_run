@@ -10,8 +10,9 @@ from django.shortcuts import get_object_or_404
 
 from django_filters.rest_framework import DjangoFilterBackend
 
-from .models import Run
+from .models import Run, AthleteInfo
 from .serializers import RunSerializer, UserSerializer
+from .utils import check_weight
 
 
 @api_view(["GET"])
@@ -86,3 +87,41 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
                 return qs.filter(is_staff=False)
 
         return qs
+
+
+class AthleteInfoView(APIView):
+    def get(self, request, user_id):
+        user = get_object_or_404(User, pk=user_id)
+        athlete_info, _ = AthleteInfo.objects.get_or_create(athlete=user)
+
+        return Response({
+            "goals": athlete_info.goals,
+            "weight": athlete_info.weight,
+            "user_id": user_id
+        })
+
+    def put(self, request, user_id):
+        weight = request.data.get("weight", None)
+        goals = request.data.get("goals", "")
+
+        if weight:
+            res = check_weight(weight)
+            if not res:
+                return Response({
+                    "message": "Неверный вес"
+                }, status=status.HTTP_400_BAD_REQUEST)
+
+        user = get_object_or_404(User, pk=user_id)
+        athlete_info, _ = AthleteInfo.objects.update_or_create(
+            athlete=user,
+            defaults={
+                "weight": weight,
+                "goals": goals,
+            }
+        )
+
+        return Response({
+            "goals": athlete_info.goals,
+            "weight": athlete_info.weight,
+            "user_id": user_id
+        }, status=status.HTTP_201_CREATED)
