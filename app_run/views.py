@@ -12,8 +12,8 @@ from rest_framework.pagination import PageNumberPagination
 
 from django_filters.rest_framework import DjangoFilterBackend
 
-from .models import Run, AthleteInfo, Challenge
-from .serializers import RunSerializer, UserSerializer, ChallengeSerializer
+from .models import Run, AthleteInfo, Challenge, Position
+from .serializers import RunSerializer, UserSerializer, ChallengeSerializer, PositionSerializer
 from .utils import check_weight
 
 
@@ -152,3 +152,14 @@ class ChallengeListView(ListAPIView):
             return Challenge.objects.filter(athlete__id=athlete_id).select_related("athlete")
 
         return Challenge.objects.all().select_related("athlete")
+
+
+class PositionViewSet(viewsets.ModelViewSet):
+    serializer_class = PositionSerializer
+
+    def get_queryset(self):
+        run_id = self.request.query_params.get("run", None)
+        if run_id:
+            return Position.objects.filter(run__id=run_id).select_related("run")
+
+        return Position.objects.all().select_related("run")

@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Run, AthleteInfo, Challenge
+from .models import Run, AthleteInfo, Challenge, Position
 
 
 @admin.register(Run)
@@ -24,3 +24,6 @@ class ChallengeAdmin(admin.ModelAdmin):
     list_display = ["full_name", "athlete"]
     list_per_page = 10
     search_fields = ["full_name", "athlete__username"]
+
+
+admin.site.register(Position)

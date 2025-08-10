@@ -22,11 +22,13 @@ from rest_framework.routers import DefaultRouter
 
 from debug_toolbar.toolbar import debug_toolbar_urls
 
-from app_run.views import company_details_view, RunViewSet, UserViewSet, RunStartView, RunStopView, AthleteInfoView, ChallengeListView
+from app_run.views import company_details_view, RunViewSet, UserViewSet, RunStartView, RunStopView, AthleteInfoView, ChallengeListView, \
+    PositionViewSet
 
 router = DefaultRouter()
 router.register("runs", RunViewSet)
 router.register("users", UserViewSet)
+router.register("positions", PositionViewSet, basename="position")
 
 urlpatterns = [
     path('admin/', admin.site.urls),
