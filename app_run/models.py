@@ -43,6 +43,12 @@ class Challenge(models.Model):
     class Meta:
         verbose_name = "Челлендж"
         verbose_name_plural = "Челленджи"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["full_name", "athlete"],
+                name="unique_challenge_per_athlete"
+            )
+        ]
 
     def __str__(self):
         return self.full_name

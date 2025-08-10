@@ -1,3 +1,7 @@
+from django.db import IntegrityError
+from django.conf import settings
+from django.contrib.auth.models import User
+from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status
 from rest_framework.generics import ListAPIView
 from rest_framework.views import APIView
@@ -5,9 +9,6 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.pagination import PageNumberPagination
-from django.conf import settings
-from django.contrib.auth.models import User
-from django.shortcuts import get_object_or_404
 
 from django_filters.rest_framework import DjangoFilterBackend
 
@@ -66,11 +67,14 @@ class RunStopView(APIView):
             if finished_runs == 10:
                 challenge_name = "Сделай 10 забегов!"
                 challenge_athlete = athlete
-                if not Challenge.objects.filter(full_name=challenge_name, athlete=challenge_athlete).exists():
+
+                try:
                     Challenge.objects.create(
-                        full_name="Сделай 10 забегов!",
-                        athlete=athlete
+                        full_name=challenge_name,
+                        athlete=challenge_athlete
                     )
+                except IntegrityError:
+                    pass
         else:
             return Response({
                 "message": "Невозможно закончить забег, он не начат"
