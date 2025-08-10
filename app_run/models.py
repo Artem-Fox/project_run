@@ -34,3 +34,15 @@ class AthleteInfo(models.Model):
 
     def __str__(self):
         return self.athlete.username
+
+
+class Challenge(models.Model):
+    full_name = models.CharField(max_length=255, verbose_name="Название челленджа")
+    athlete = models.ForeignKey(User, on_delete=models.CASCADE, related_name="challenges", verbose_name="Атлет")
+
+    class Meta:
+        verbose_name = "Челлендж"
+        verbose_name_plural = "Челленджи"
+
+    def __str__(self):
+        return self.full_name
