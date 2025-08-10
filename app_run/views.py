@@ -64,10 +64,13 @@ class RunStopView(APIView):
             athlete = run.athlete
             finished_runs = athlete.runs.filter(status="finished").count()
             if finished_runs == 10:
-                Challenge.objects.create(
-                    full_name="Сделай 10 забегов!",
-                    athlete=athlete
-                )
+                challenge_name = "Сделай 10 забегов!"
+                challenge_athlete = athlete
+                if not Challenge.objects.filter(full_name=challenge_name, athlete=challenge_athlete).exists():
+                    Challenge.objects.create(
+                        full_name="Сделай 10 забегов!",
+                        athlete=athlete
+                    )
         else:
             return Response({
                 "message": "Невозможно закончить забег, он не начат"
