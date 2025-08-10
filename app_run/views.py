@@ -1,4 +1,5 @@
 from rest_framework import viewsets, status
+from rest_framework.generics import ListAPIView
 from rest_framework.views import APIView
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -10,8 +11,8 @@ from django.shortcuts import get_object_or_404
 
 from django_filters.rest_framework import DjangoFilterBackend
 
-from .models import Run, AthleteInfo
-from .serializers import RunSerializer, UserSerializer
+from .models import Run, AthleteInfo, Challenge
+from .serializers import RunSerializer, UserSerializer, ChallengeSerializer
 from .utils import check_weight
 
 
@@ -59,13 +60,21 @@ class RunStopView(APIView):
         if run.status == "in_progress":
             run.status = "finished"
             run.save()
+
+            athlete = run.athlete
+            finished_runs = athlete.runs.filter(status="finished").count()
+            if finished_runs == 10:
+                Challenge.objects.create(
+                    full_name="Сделай 10 забегов!",
+                    athlete=athlete
+                )
         else:
             return Response({
-                "message": "Невозможно закончить забег, он не начат",
+                "message": "Невозможно закончить забег, он не начат"
             }, status=status.HTTP_400_BAD_REQUEST)
 
         return Response({
-            "message": "Забег закончен",
+            "message": "Забег закончен"
         })
 
 
@@ -125,3 +134,14 @@ class AthleteInfoView(APIView):
             "weight": athlete_info.weight,
             "user_id": user_id
         }, status=status.HTTP_201_CREATED)
+
+
+class ChallengeListView(ListAPIView):
+    serializer_class = ChallengeSerializer
+
+    def get_queryset(self):
+        athlete_id = self.request.query_params.get("athlete", None)
+        if athlete_id:
+            return Challenge.objects.filter(athlete__id=athlete_id).select_related("athlete")
+
+        return Challenge.objects.all().select_related("athlete")
