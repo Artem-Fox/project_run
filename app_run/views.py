@@ -14,7 +14,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 
 from .models import Run, AthleteInfo, Challenge, Position
 from .serializers import RunSerializer, UserSerializer, ChallengeSerializer, PositionSerializer
-from .utils import check_weight
+from .utils import check_weight, calculate_distance
 
 
 @api_view(["GET"])
@@ -75,6 +75,18 @@ class RunStopView(APIView):
                     )
                 except IntegrityError:
                     pass
+
+            positions = run.positions.all()
+            if positions.count() > 1:
+                all_positions = []
+                for position in positions:
+                    coords = (position.latitude, position.longitude)
+                    all_positions.append(coords)
+
+                distance = calculate_distance(all_positions)
+                run.distance = distance
+                run.save()
+
         else:
             return Response({
                 "message": "Невозможно закончить забег, он не начат"

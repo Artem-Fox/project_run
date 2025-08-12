@@ -13,6 +13,7 @@ class Run(models.Model):
     comment = models.TextField(blank=True, verbose_name="Комментарий")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
     status = models.CharField(max_length=11, choices=STATUS_CHOICES, default="init", verbose_name="Статус")
+    distance = models.FloatField(blank=True, null=True, verbose_name="Пройденная дистанция")
 
     class Meta:
         ordering = ["-created_at"]
