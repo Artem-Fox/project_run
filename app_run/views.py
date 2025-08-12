@@ -1,6 +1,6 @@
-from django.db import IntegrityError
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.db.models import Sum
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status
 from rest_framework.generics import ListAPIView
@@ -14,7 +14,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 
 from .models import Run, AthleteInfo, Challenge, Position
 from .serializers import RunSerializer, UserSerializer, ChallengeSerializer, PositionSerializer
-from .utils import check_weight, calculate_distance
+from .utils import create_challenge, check_weight, calculate_distance
 
 
 @api_view(["GET"])
@@ -63,18 +63,9 @@ class RunStopView(APIView):
             run.save()
 
             athlete = run.athlete
-            finished_runs = athlete.runs.filter(status="finished").count()
-            if finished_runs == 10:
-                challenge_name = "Сделай 10 Забегов!"
-                challenge_athlete = athlete
-
-                try:
-                    Challenge.objects.create(
-                        full_name=challenge_name,
-                        athlete=challenge_athlete
-                    )
-                except IntegrityError:
-                    pass
+            finished_runs = athlete.runs.filter(status="finished")
+            if finished_runs.count() == 10:
+                create_challenge("Сделай 10 Забегов!", athlete)
 
             positions = run.positions.all()
             if positions.count() > 1:
@@ -87,6 +78,9 @@ class RunStopView(APIView):
                 run.distance = distance
                 run.save()
 
+            total_distance = finished_runs.aggregate(total_distance=Sum("distance")).get("total_distance", 0)
+            if total_distance >= 50:
+                create_challenge("Пробеги 50 километров!", athlete)
         else:
             return Response({
                 "message": "Невозможно закончить забег, он не начат"

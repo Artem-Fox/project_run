@@ -1,4 +1,18 @@
+from django.db.utils import IntegrityError
+
 from geopy.distance import geodesic
+
+from .models import Challenge
+
+
+def create_challenge(challenge_name, user):
+    try:
+        Challenge.objects.create(
+            full_name=challenge_name,
+            athlete=user
+        )
+    except IntegrityError:
+        pass
 
 
 def check_weight(weight):
