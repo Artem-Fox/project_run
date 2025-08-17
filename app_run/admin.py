@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Run, AthleteInfo, Challenge, Position
+from .models import Run, AthleteInfo, Challenge, Position, CollectibleItem
 
 
 @admin.register(Run)
@@ -27,3 +27,11 @@ class ChallengeAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Position)
+
+
+@admin.register(CollectibleItem)
+class CollectibleItemAdmin(admin.ModelAdmin):
+    list_display = ["uid", "name"]
+    list_display_links = ["uid", "name"]
+    list_per_page = 10
+    search_fields = ["uid", "name"]

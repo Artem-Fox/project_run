@@ -12,9 +12,11 @@ from rest_framework.pagination import PageNumberPagination
 
 from django_filters.rest_framework import DjangoFilterBackend
 
-from .models import Run, AthleteInfo, Challenge, Position
-from .serializers import RunSerializer, UserSerializer, ChallengeSerializer, PositionSerializer
+from .models import Run, AthleteInfo, Challenge, Position, CollectibleItem
+from .serializers import RunSerializer, UserSerializer, ChallengeSerializer, PositionSerializer, CollectibleItemSerializer
 from .utils import create_challenge, check_weight, calculate_distance
+
+import openpyxl
 
 
 @api_view(["GET"])
@@ -169,3 +171,41 @@ class PositionViewSet(viewsets.ModelViewSet):
             return Position.objects.filter(run__id=run_id).select_related("run")
 
         return Position.objects.all().select_related("run")
+
+
+class CollectibleItemView(ListAPIView):
+    queryset = CollectibleItem.objects.all()
+    serializer_class = CollectibleItemSerializer
+
+
+class UploadCollectibleItemView(APIView):
+    def post(self, request):
+        file = request.data.get("file", None)
+        if file:
+            workbook = openpyxl.load_workbook(file)
+            worksheet = workbook.active
+            invalid_rows = []
+
+            for row in worksheet.iter_rows(min_row=2, values_only=True):
+                data = {
+                    "name": row[0],
+                    "uid": row[1],
+                    "value": row[2],
+                    "latitude": row[3],
+                    "longitude": row[4],
+                    "picture": row[5]
+                }
+
+                serializer = CollectibleItemSerializer(data=data)
+                if serializer.is_valid():
+                    serializer.save()
+                else:
+                    invalid_rows.append(list(data.values()))
+
+            return Response({
+                "invalid_rows": invalid_rows
+            })
+
+        return Response({
+            "message": "Пожалуйста, загрузите Excel-файл"
+        }, status=status.HTTP_400_BAD_REQUEST)
