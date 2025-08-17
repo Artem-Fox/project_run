@@ -202,9 +202,7 @@ class UploadCollectibleItemView(APIView):
                 else:
                     invalid_rows.append(list(data.values()))
 
-            return Response({
-                "invalid_rows": invalid_rows
-            })
+            return Response(invalid_rows)
 
         return Response({
             "message": "Пожалуйста, загрузите Excel-файл"
