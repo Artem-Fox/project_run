@@ -191,14 +191,7 @@ class PositionViewSet(viewsets.ModelViewSet):
             collectible_items = CollectibleItem.objects.all().prefetch_related("users")
             if collectible_items:
                 for collectible in collectible_items:
-                    latitude = collectible.latitude
-                    longitude = collectible.longitude
-                    collectible_coords = (latitude, longitude)
-
-                    if not (-90 <= latitude <= 90) or not (-180 <= longitude <= 180):
-                        return Response({
-                            "message": f"Некорректные координаты: широта={latitude}, долгота={longitude}"
-                        }, status=status.HTTP_400_BAD_REQUEST)
+                    collectible_coords = (collectible.latitude, collectible.longitude)
 
                     distance = geodesic(position_coords, collectible_coords).meters
                     if distance <= 100:
@@ -228,6 +221,11 @@ class UploadCollectibleItemView(APIView):
             invalid_rows = []
 
             for row in worksheet.iter_rows(min_row=2, values_only=True):
+                name, uid, value, lat, lng, picture = row
+                if not (-90 < lat < 90) or not (-180 < lng < 180):
+                    invalid_rows.append(list(row))
+                    continue
+
                 data = {
                     "name": row[0],
                     "uid": row[1],
