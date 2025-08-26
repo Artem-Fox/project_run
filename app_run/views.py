@@ -221,11 +221,6 @@ class UploadCollectibleItemView(APIView):
             invalid_rows = []
 
             for row in worksheet.iter_rows(min_row=2, values_only=True):
-                name, uid, value, lat, lng, picture = row
-                if not (-90 < lat < 90) or not (-180 < lng < 180):
-                    invalid_rows.append(list(row))
-                    continue
-
                 data = {
                     "name": row[0],
                     "uid": row[1],
