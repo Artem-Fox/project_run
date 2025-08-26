@@ -191,7 +191,14 @@ class PositionViewSet(viewsets.ModelViewSet):
             collectible_items = CollectibleItem.objects.all().prefetch_related("users")
             if collectible_items:
                 for collectible in collectible_items:
-                    collectible_coords = (collectible.latitude, collectible.longitude)
+                    latitude = collectible.latitude
+                    longitude = collectible.longitude
+                    collectible_coords = (latitude, longitude)
+
+                    if not (-90 <= latitude <= 90) or not (-180 <= longitude <= 180):
+                        return Response({
+                            "message": f"Некорректные координаты: широта={latitude}, долгота={longitude}"
+                        }, status=status.HTTP_400_BAD_REQUEST)
 
                     distance = geodesic(position_coords, collectible_coords).meters
                     if distance <= 100:
