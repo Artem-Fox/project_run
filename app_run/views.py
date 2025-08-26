@@ -185,15 +185,15 @@ class PositionViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             position = serializer.save()
-            position.coords = (position.latitude, position.longitude)
+            position_coords = (position.latitude, position.longitude)
             user = position.run.athlete
 
             collectible_items = CollectibleItem.objects.all().prefetch_related("users")
             if collectible_items:
                 for collectible in collectible_items:
-                    collectible.coords = (collectible.latitude, collectible.longitude)
+                    collectible_coords = (collectible.latitude, collectible.longitude)
 
-                    distance = geodesic(position.coords, collectible.coords).meters
+                    distance = geodesic(position_coords, collectible_coords).meters
                     if distance <= 100:
                         if user not in collectible.users.all():
                             collectible.users.add(user)
