@@ -13,10 +13,11 @@ from rest_framework.pagination import PageNumberPagination
 from django_filters.rest_framework import DjangoFilterBackend
 
 from .models import Run, AthleteInfo, Challenge, Position, CollectibleItem
-from .serializers import RunSerializer, UserSerializer, ChallengeSerializer, PositionSerializer, CollectibleItemSerializer
+from .serializers import RunSerializer, UserSerializer, UserDetailSerializer, ChallengeSerializer, PositionSerializer, CollectibleItemSerializer
 from .utils import create_challenge, check_weight, calculate_distance
 
 import openpyxl
+from geopy.distance import geodesic
 
 
 @api_view(["GET"])
@@ -112,6 +113,14 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
 
         return qs
 
+    def get_serializer_class(self):
+        if self.action == "list":
+            return UserSerializer
+        elif self.action == "retrieve":
+            return UserDetailSerializer
+
+        return super().get_serializer_class()
+
 
 class AthleteInfoView(APIView):
     def get(self, request, user_id):
@@ -171,6 +180,33 @@ class PositionViewSet(viewsets.ModelViewSet):
             return Position.objects.filter(run__id=run_id).select_related("run")
 
         return Position.objects.all().select_related("run")
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            position = serializer.save()
+            position.coords = (position.latitude, position.longitude)
+            user = position.run.athlete
+
+            collectible_items = CollectibleItem.objects.all().prefetch_related("users")
+            if collectible_items:
+                for collectible in collectible_items:
+                    collectible.coords = (collectible.latitude, collectible.longitude)
+
+                    distance = geodesic(position.coords, collectible.coords).meters
+                    if distance <= 100:
+                        if user not in collectible.users.all():
+                            collectible.users.add(user)
+                            return Response({
+                                "message": f"Вы нашли предмет {collectible.name}",
+                                "item_id": collectible.id
+                            }, status=status.HTTP_201_CREATED)
+
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        return Response({
+            "message": "Неверные данные"
+        }, status=status.HTTP_400_BAD_REQUEST)
 
 
 class CollectibleItemView(ListAPIView):

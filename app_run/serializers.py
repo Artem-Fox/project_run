@@ -69,7 +69,7 @@ class PositionSerializer(serializers.ModelSerializer):
 class CollectibleItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = CollectibleItem
-        fields = "__all__"
+        fields = ["id", "name", "uid", "latitude", "longitude", "picture", "value"]
 
     def validate_latitude(self, value):
         if value < -90 or value > 90:
@@ -82,3 +82,11 @@ class CollectibleItemSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Долгота должна быть в пределах от -180 до 180")
         else:
             return value
+
+
+class UserDetailSerializer(UserSerializer):
+    items = CollectibleItemSerializer(many=True, read_only=True)
+
+    class Meta(UserSerializer.Meta):
+        model = User
+        fields = UserSerializer.Meta.fields + ["items"]
