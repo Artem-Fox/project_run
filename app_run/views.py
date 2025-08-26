@@ -191,7 +191,12 @@ class PositionViewSet(viewsets.ModelViewSet):
             collectible_items = CollectibleItem.objects.all().prefetch_related("users")
             if collectible_items:
                 for collectible in collectible_items:
+                    latitude = collectible.latitude
+                    longitude = collectible.longitude
                     collectible_coords = (collectible.latitude, collectible.longitude)
+
+                    if latitude > 90 or latitude < -90 or longitude > 180 or longitude < -180:
+                        continue
 
                     distance = geodesic(position_coords, collectible_coords).meters
                     if distance <= 100:
