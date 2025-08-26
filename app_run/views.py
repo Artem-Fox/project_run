@@ -204,9 +204,7 @@ class PositionViewSet(viewsets.ModelViewSet):
 
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-        return Response({
-            "message": "Неверные данные"
-        }, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class CollectibleItemView(ListAPIView):
