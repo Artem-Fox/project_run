@@ -71,8 +71,8 @@ class Position(models.Model):
 class CollectibleItem(models.Model):
     name = models.CharField(max_length=255, verbose_name="Название")
     uid = models.CharField(max_length=255, verbose_name="UID")
-    latitude = models.DecimalField(max_digits=6, decimal_places=4, verbose_name="Широта")
-    longitude = models.DecimalField(max_digits=7, decimal_places=4, verbose_name="Долгота")
+    latitude = models.FloatField(verbose_name="Широта")
+    longitude = models.FloatField(verbose_name="Долгота")
     picture = models.URLField(verbose_name="Ссылка на картинку")
     value = models.IntegerField(verbose_name="Значение")
     users = models.ManyToManyField(User, blank=True, related_name="items", verbose_name="Атлеты")
