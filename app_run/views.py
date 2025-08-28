@@ -87,7 +87,7 @@ class RunStopView(APIView):
                 run.save()
 
             total_distance = finished_runs.aggregate(total_distance=Sum("distance")).get("total_distance", 0)
-            if total_distance >= 50:
+            if total_distance and total_distance >= 50:
                 create_challenge("Пробеги 50 километров!", athlete)
         else:
             return Response({
