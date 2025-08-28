@@ -6,7 +6,7 @@ from .models import Run, Challenge, Position, CollectibleItem
 
 class UserSerializer(serializers.ModelSerializer):
     type = serializers.SerializerMethodField()
-    runs_finished = serializers.SerializerMethodField()
+    runs_finished = serializers.IntegerField()
 
     class Meta:
         model = User
@@ -17,9 +17,6 @@ class UserSerializer(serializers.ModelSerializer):
             return "coach"
 
         return "athlete"
-
-    def get_runs_finished(self, obj):
-        return obj.runs.filter(status="finished").count()
 
 
 class AthleteSerializer(serializers.ModelSerializer):

@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.contrib.auth.models import User
-from django.db.models import Sum, Min, Max
+from django.db.models import Sum, Min, Max, Q, Count
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status
 from rest_framework.generics import ListAPIView
@@ -100,7 +100,7 @@ class RunStopView(APIView):
 
 
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = User.objects.exclude(is_superuser=True).order_by("id")
+    queryset = User.objects.exclude(is_superuser=True).order_by("id").annotate(runs_finished=Count("runs", filter=Q(runs__status="finished")))
     serializer_class = UserSerializer
     pagination_class = SizePagination
     filter_backends = [SearchFilter, OrderingFilter]
