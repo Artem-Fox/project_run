@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.contrib.auth.models import User
-from django.db.models import Sum
+from django.db.models import Sum, Min, Max
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status
 from rest_framework.generics import ListAPIView
@@ -79,6 +79,11 @@ class RunStopView(APIView):
 
                 distance = calculate_distance(all_positions)
                 run.distance = distance
+
+                min_time = positions.aggregate(min_time=Min("date_time")).get("min_time")
+                max_time = positions.aggregate(max_time=Max("date_time")).get("max_time")
+                run_time = (max_time - min_time).total_seconds()
+                run.run_time_seconds = run_time if run_time else 0
                 run.save()
 
             total_distance = finished_runs.aggregate(total_distance=Sum("distance")).get("total_distance", 0)

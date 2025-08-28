@@ -14,6 +14,7 @@ class Run(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
     status = models.CharField(max_length=11, choices=STATUS_CHOICES, default="init", verbose_name="Статус")
     distance = models.FloatField(blank=True, null=True, verbose_name="Пройденная дистанция")
+    run_time_seconds = models.IntegerField(blank=True, null=True, verbose_name="Время забега в секундах")
 
     class Meta:
         ordering = ["-created_at"]
@@ -59,6 +60,7 @@ class Position(models.Model):
     run = models.ForeignKey(Run, on_delete=models.CASCADE, related_name="positions", verbose_name="Забег")
     latitude = models.DecimalField(max_digits=6, decimal_places=4, verbose_name="Широта")
     longitude = models.DecimalField(max_digits=7, decimal_places=4, verbose_name="Долгота")
+    date_time = models.DateTimeField(blank=True, null=True, verbose_name="Дата и время")
 
     class Meta:
         verbose_name = "Позиция"
