@@ -70,13 +70,13 @@ class RunStopView(APIView):
             if finished_runs.count() == 10:
                 create_challenge("Сделай 10 Забегов!", athlete)
 
-            positions = run.positions.all()
-            if positions.count() > 1:
-                total_distance = positions.last().distance
+            all_positions = run.positions.all().order_by("date_time")
+            if all_positions.count() > 1:
+                total_distance = all_positions.last().distance
                 run.distance = total_distance
 
-                min_time = positions.aggregate(min_time=Min("date_time")).get("min_time")
-                max_time = positions.aggregate(max_time=Max("date_time")).get("max_time")
+                min_time = all_positions.aggregate(min_time=Min("date_time")).get("min_time")
+                max_time = all_positions.aggregate(max_time=Max("date_time")).get("max_time")
                 run_time = (max_time - min_time).total_seconds()
                 run.run_time_seconds = run_time if run_time else 0
 
@@ -194,7 +194,7 @@ class PositionViewSet(viewsets.ModelViewSet):
             position_coords = (position_latitude, position_longitude)
             position_date_time = serializer.validated_data["date_time"]
 
-            all_positions = Position.objects.filter(run=position_run)
+            all_positions = Position.objects.filter(run=position_run).order_by("date_time")
             if all_positions.exists():
                 last_position = all_positions.last()
                 last_position_coords = (last_position.latitude, last_position.longitude)
