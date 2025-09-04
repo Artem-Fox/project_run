@@ -204,7 +204,7 @@ class PositionViewSet(viewsets.ModelViewSet):
                 dist_diff = geodesic(position_coords, last_position_coords).meters
                 time_diff = (position_date_time - last_position_date_time).total_seconds()
                 speed = round(dist_diff / time_diff, 2) if time_diff else 0
-                distance = round((last_position_distance + dist_diff) / 1000, 2)
+                distance = round(last_position_distance + dist_diff / 1000, 2)
 
                 position = serializer.save(speed=speed, distance=distance)
             else:
