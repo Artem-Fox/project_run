@@ -61,8 +61,8 @@ class Position(models.Model):
     latitude = models.DecimalField(max_digits=6, decimal_places=4, verbose_name="Широта")
     longitude = models.DecimalField(max_digits=7, decimal_places=4, verbose_name="Долгота")
     date_time = models.DateTimeField(blank=True, null=True, verbose_name="Дата и время")
-    speed = models.FloatField(blank=True, null=True, verbose_name="Скорость")
-    distance = models.FloatField(blank=True, null=True, verbose_name="Пройденная дистанция")
+    speed = models.FloatField(blank=True, null=True, default=0.0, verbose_name="Скорость")
+    distance = models.FloatField(blank=True, null=True, default=0.0, verbose_name="Пройденная дистанция")
 
     class Meta:
         verbose_name = "Позиция"
