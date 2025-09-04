@@ -84,6 +84,10 @@ class RunStopView(APIView):
                 max_time = positions.aggregate(max_time=Max("date_time")).get("max_time")
                 run_time = (max_time - min_time).total_seconds()
                 run.run_time_seconds = run_time if run_time else 0
+
+                avg_speed = round(distance / run_time, 2) if run_time else 0
+                run.speed = avg_speed
+
                 run.save()
 
             total_distance = finished_runs.aggregate(total_distance=Sum("distance")).get("total_distance", 0)
