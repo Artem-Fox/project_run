@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.contrib.auth.models import User
-from django.db.models import Sum, Min, Max, Q, Count
+from django.db.models import Sum, Min, Max, Q, Count, Avg
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status
 from rest_framework.generics import ListAPIView
@@ -84,7 +84,7 @@ class RunStopView(APIView):
                 run_time = (max_time - min_time).total_seconds()
                 run.run_time_seconds = run_time if run_time else 0
 
-                avg_speed = ((total_distance * 1000) / run_time) if run_time else 0
+                avg_speed = run.positions.aggregate(avg_speed=Avg("speed")).get("avg_speed")
                 run.speed = round(avg_speed, 2)
 
                 run.save()
