@@ -72,7 +72,7 @@ class RunStopView(APIView):
 
             positions = run.positions.all()
             if positions.count() > 1:
-                total_distance = positions.aggregate(total_distance=Sum("distance")).get("total_distance", 0)
+                total_distance = positions.last().distance
                 run.distance = total_distance
 
                 min_time = positions.aggregate(min_time=Min("date_time")).get("min_time")
