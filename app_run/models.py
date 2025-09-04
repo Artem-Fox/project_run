@@ -15,6 +15,7 @@ class Run(models.Model):
     status = models.CharField(max_length=11, choices=STATUS_CHOICES, default="init", verbose_name="Статус")
     distance = models.FloatField(blank=True, null=True, verbose_name="Пройденная дистанция")
     run_time_seconds = models.IntegerField(blank=True, null=True, verbose_name="Время забега в секундах")
+    speed = models.FloatField(blank=True, null=True, default=0, verbose_name="Средняя скорость")
 
     class Meta:
         ordering = ["-created_at"]
@@ -61,8 +62,8 @@ class Position(models.Model):
     latitude = models.DecimalField(max_digits=6, decimal_places=4, verbose_name="Широта")
     longitude = models.DecimalField(max_digits=7, decimal_places=4, verbose_name="Долгота")
     date_time = models.DateTimeField(blank=True, null=True, verbose_name="Дата и время")
-    speed = models.FloatField(blank=True, null=True, default=0.0, verbose_name="Скорость")
-    distance = models.FloatField(blank=True, null=True, default=0.0, verbose_name="Пройденная дистанция")
+    speed = models.FloatField(blank=True, null=True, default=0, verbose_name="Скорость")
+    distance = models.FloatField(blank=True, null=True, default=0, verbose_name="Пройденная дистанция")
 
     class Meta:
         verbose_name = "Позиция"
