@@ -80,8 +80,8 @@ class RunStopView(APIView):
                 run_time = (max_time - min_time).total_seconds()
                 run.run_time_seconds = run_time if run_time else 0
 
-                avg_speed = round(total_distance * 1000 / run_time, 2) if run_time else 0
-                run.speed = avg_speed
+                avg_speed = ((total_distance * 1000) / run_time) if run_time else 0
+                run.speed = round(avg_speed, 2)
 
                 run.save()
 
