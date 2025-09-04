@@ -194,19 +194,29 @@ class PositionViewSet(viewsets.ModelViewSet):
             position_coords = (position_latitude, position_longitude)
             position_date_time = serializer.validated_data["date_time"]
 
-            run_positions = Position.objects.filter(run=serializer.validated_data["run"])
-            last_position = run_positions.last()
+            last_position = Position.objects.filter(run=serializer.validated_data["run"]).last()
             if last_position:
                 last_position_coords = (last_position.latitude, last_position.longitude)
                 last_position_date_time = last_position.date_time
 
                 dist_diff = geodesic(position_coords, last_position_coords).meters
                 time_diff = (position_date_time - last_position_date_time).total_seconds()
-                speed = dist_diff / time_diff if time_diff else 0
+                speed = round(dist_diff / time_diff, 2) if time_diff else 0
 
                 position = serializer.save(speed=speed)
             else:
                 position = serializer.save()
+
+            run_positions = Position.objects.filter(run=serializer.validated_data["run"])
+
+            if run_positions.count() > 1:
+                all_positions = []
+                for position in run_positions:
+                    coords = (position.latitude, position.longitude)
+                    all_positions.append(coords)
+
+                total_distance = round(calculate_distance(all_positions), 2)
+                position = serializer.save(distance=total_distance)
 
             user = position.run.athlete
 
