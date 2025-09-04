@@ -72,7 +72,11 @@ class RunStopView(APIView):
 
             all_positions = run.positions.all().order_by("date_time")
             if all_positions.count() > 1:
-                total_distance = all_positions.last().distance
+                positions_coords = []
+                for position in all_positions:
+                    positions_coords.append((position.latitude, position.longitude))
+
+                total_distance = round(calculate_distance(positions_coords), 2)
                 run.distance = total_distance
 
                 min_time = all_positions.aggregate(min_time=Min("date_time")).get("min_time")
