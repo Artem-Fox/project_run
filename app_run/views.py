@@ -92,6 +92,9 @@ class RunStopView(APIView):
             total_distance = finished_runs.aggregate(total_distance=Sum("distance")).get("total_distance", 0)
             if total_distance and total_distance >= 50:
                 create_challenge("Пробеги 50 километров!", athlete)
+
+            if total_distance and total_distance >= 2 and run.run_time_seconds / 60 <= 10:
+                create_challenge("2 километра за 10 минут!", athlete)
         else:
             return Response({
                 "message": "Невозможно закончить забег, он не начат"
