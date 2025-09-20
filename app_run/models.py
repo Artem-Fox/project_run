@@ -85,3 +85,21 @@ class CollectibleItem(models.Model):
     class Meta:
         verbose_name = "Коллекционный предмет"
         verbose_name_plural = "Коллекционные предметы"
+
+
+class Subscribe(models.Model):
+    subscriber = models.ForeignKey(User, on_delete=models.CASCADE, related_name="subscribers", verbose_name="Подписчик")
+    subscribed_to = models.ForeignKey(User, on_delete=models.CASCADE, related_name="subscriptions", verbose_name="Подписан на")
+
+    class Meta:
+        verbose_name = "Подписка"
+        verbose_name_plural = "Подписки"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["subscriber", "subscribed_to"],
+                name="unique_subscription",
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.subscriber} подписан на {self.subscribed_to}"
