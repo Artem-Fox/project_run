@@ -305,7 +305,7 @@ class SubscribeToCoachView(APIView):
         except User.DoesNotExist:
             return Response({
                 "message": "Тренер не найден"
-            }, status=status.HTTP_404_NOT_FOUND)
+            }, status=status.HTTP_400_BAD_REQUEST)
 
         if Subscribe.objects.filter(subscriber=athlete).exists():
             return Response({
