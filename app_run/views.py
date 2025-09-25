@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.db.models import Sum, Min, Max, Q, Count, Avg
+from django.db.utils import IntegrityError
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status
 from rest_framework.generics import ListAPIView
@@ -10,14 +11,14 @@ from rest_framework.response import Response
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.pagination import PageNumberPagination
 
-from django_filters.rest_framework import DjangoFilterBackend
-
-from .models import Run, AthleteInfo, Challenge, Position, CollectibleItem
-from .serializers import RunSerializer, UserSerializer, UserDetailSerializer, ChallengeSerializer, PositionSerializer, CollectibleItemSerializer
-from .utils import create_challenge, check_weight, calculate_distance
-
 import openpyxl
 from geopy.distance import geodesic
+from django_filters.rest_framework import DjangoFilterBackend
+
+from .models import Run, AthleteInfo, Challenge, Position, CollectibleItem, Subscribe
+from .serializers import RunSerializer, UserSerializer, UserDetailSerializer, CoachDetailSerializer, ChallengeSerializer, PositionSerializer, \
+    CollectibleItemSerializer
+from .utils import create_challenge, check_weight, calculate_distance
 
 
 @api_view(["GET"])
@@ -127,8 +128,13 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
     def get_serializer_class(self):
         if self.action == "list":
             return UserSerializer
-        elif self.action == "retrieve":
-            return UserDetailSerializer
+
+        if self.action == "retrieve":
+            user = self.get_object()
+            if user.is_staff:
+                return CoachDetailSerializer
+            else:
+                return UserDetailSerializer
 
         return super().get_serializer_class()
 
@@ -277,3 +283,36 @@ class UploadCollectibleItemView(APIView):
         return Response({
             "message": "Пожалуйста, загрузите Excel-файл"
         }, status=status.HTTP_400_BAD_REQUEST)
+
+
+class SubscribeToCoachView(APIView):
+    def post(self, request, coach_id):
+        athlete_id = request.data.get("athlete")
+        if not athlete_id:
+            return Response({
+                "message": "Не указан id атлета"
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            athlete = User.objects.get(pk=athlete_id, is_staff=False)
+        except User.DoesNotExist:
+            return Response({
+                "message": "Атлет не найден"
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            coach = User.objects.get(pk=coach_id, is_staff=True)
+        except User.DoesNotExist:
+            return Response({
+                "message": "Тренер не найден"
+            }, status=status.HTTP_404_NOT_FOUND)
+
+        if Subscribe.objects.filter(subscriber=athlete).exists():
+            return Response({
+                "message": "Подписка уже оформлена"
+            }, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            Subscribe.objects.create(subscriber=athlete, subscribed_to=coach)
+            return Response({
+                "message": "Подписка оформлена"
+            })

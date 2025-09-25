@@ -23,7 +23,7 @@ from rest_framework.routers import DefaultRouter
 from debug_toolbar.toolbar import debug_toolbar_urls
 
 from app_run.views import company_details_view, RunViewSet, UserViewSet, RunStartView, RunStopView, AthleteInfoView, ChallengeListView, \
-    PositionViewSet, CollectibleItemView, UploadCollectibleItemView
+    PositionViewSet, CollectibleItemView, UploadCollectibleItemView, SubscribeToCoachView
 
 router = DefaultRouter()
 router.register("runs", RunViewSet)
@@ -40,6 +40,7 @@ urlpatterns = [
     path("api/challenges/", ChallengeListView.as_view()),
     path("api/collectible_item/", CollectibleItemView.as_view()),
     path("api/upload_file/", UploadCollectibleItemView.as_view()),
+    path("api/subscribe_to_coach/<int:coach_id>/", SubscribeToCoachView.as_view()),
 ]
 
 if settings.DEBUG:
