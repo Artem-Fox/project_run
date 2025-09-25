@@ -301,11 +301,15 @@ class SubscribeToCoachView(APIView):
             }, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            coach = User.objects.get(pk=coach_id, is_staff=True)
+            coach = User.objects.get(pk=coach_id)
+            if not coach.is_staff:
+                return Response({
+                    "message": "Этот пользователь не является тренером",
+                }, status=status.HTTP_400_BAD_REQUEST)
         except User.DoesNotExist:
             return Response({
                 "message": "Тренер не найден"
-            }, status=status.HTTP_400_BAD_REQUEST)
+            }, status=status.HTTP_404_NOT_FOUND)
 
         if Subscribe.objects.filter(subscriber=athlete).exists():
             return Response({
