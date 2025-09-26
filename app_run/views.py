@@ -1,7 +1,6 @@
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.db.models import Sum, Min, Max, Q, Count, Avg
-from django.db.utils import IntegrityError
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status
 from rest_framework.generics import ListAPIView
@@ -16,7 +15,8 @@ from geopy.distance import geodesic
 from django_filters.rest_framework import DjangoFilterBackend
 
 from .models import Run, AthleteInfo, Challenge, Position, CollectibleItem, Subscribe
-from .serializers import RunSerializer, UserSerializer, UserDetailSerializer, CoachDetailSerializer, ChallengeSerializer, PositionSerializer, \
+from .serializers import RunSerializer, UserSerializer, UserDetailSerializer, CoachDetailSerializer, ChallengeSerializer, \
+    PositionSerializer, \
     CollectibleItemSerializer
 from .utils import create_challenge, check_weight, calculate_distance
 
@@ -186,6 +186,25 @@ class ChallengeListView(ListAPIView):
             return Challenge.objects.filter(athlete__id=athlete_id).select_related("athlete")
 
         return Challenge.objects.all().select_related("athlete")
+
+
+class ChallengeSummaryView(APIView):
+    def get(self, request):
+        data = []
+
+        challenges = Challenge.objects.all().select_related("athlete")
+        if challenges.exists():
+            challenges_names = set(challenges.values_list("full_name", flat=True))
+            for challenge_name in challenges_names:
+                athletes = challenges.filter(full_name=challenge_name).values_list("athlete_id", "athlete__first_name", "athlete__last_name",
+                                                                                   "athlete__username")
+
+                data.append({
+                    "name_to_display": challenge_name,
+                    "athletes": [{"id": athlete[0], "full_name": f"{athlete[1]} {athlete[2]}", "username": athlete[3]} for athlete in athletes]
+                })
+
+        return Response(data)
 
 
 class PositionViewSet(viewsets.ModelViewSet):
