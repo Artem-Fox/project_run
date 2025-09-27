@@ -39,6 +39,19 @@ class AthleteInfo(models.Model):
         return self.athlete.username
 
 
+class Rating(models.Model):
+    rater = models.ForeignKey(User, on_delete=models.CASCADE, related_name="ratings", verbose_name="Оценивающий")
+    rated = models.ForeignKey(User, on_delete=models.CASCADE, related_name="rated_by", verbose_name="Оцениваемый")
+    rating = models.PositiveSmallIntegerField(verbose_name="Рейтинг")
+
+    class Meta:
+        verbose_name = "Рейтинг"
+        verbose_name_plural = "Рейтинги"
+
+    def __str__(self):
+        return f"{self.rater.username} оценил {self.rated.username} на {self.rating} баллов"
+
+
 class Challenge(models.Model):
     full_name = models.CharField(max_length=255, verbose_name="Название челленджа")
     athlete = models.ForeignKey(User, on_delete=models.CASCADE, related_name="challenges", verbose_name="Атлет")
