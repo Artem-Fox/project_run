@@ -21,7 +21,7 @@ class UserSerializer(serializers.ModelSerializer):
         return "athlete"
 
     def get_rating(self, obj):
-        avg_rating = Rating.objects.filter(rated=obj).aggregate(avg_rating=Avg("rating"))["avg_rating"]
+        avg_rating = Rating.objects.filter(rated=obj).select_related("rater", "rated").aggregate(avg_rating=Avg("rating"))["avg_rating"]
         return avg_rating
 
 
