@@ -361,7 +361,7 @@ class RateCoachView(APIView):
             if not coach.is_staff:
                 return Response({
                     "message": "Этот пользователь не является тренером",
-                }, status=status.HTTP_400_BAD_REQUEST)
+                }, status=status.HTTP_404_NOT_FOUND)
         except User.DoesNotExist:
             return Response({
                 "message": "Тренер не найден"
