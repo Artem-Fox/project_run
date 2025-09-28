@@ -357,13 +357,6 @@ class RateCoachView(APIView):
             }, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            athlete = User.objects.get(pk=athlete_id, is_staff=False)
-        except User.DoesNotExist:
-            return Response({
-                "message": "Атлет не найден"
-            }, status=status.HTTP_400_BAD_REQUEST)
-
-        try:
             coach = User.objects.get(pk=coach_id)
             if not coach.is_staff:
                 return Response({
@@ -373,6 +366,13 @@ class RateCoachView(APIView):
             return Response({
                 "message": "Тренер не найден"
             }, status=status.HTTP_404_NOT_FOUND)
+
+        try:
+            athlete = User.objects.get(pk=athlete_id, is_staff=False)
+        except User.DoesNotExist:
+            return Response({
+                "message": "Атлет не найден"
+            }, status=status.HTTP_400_BAD_REQUEST)
 
         data = {
             "rater": athlete_id,
