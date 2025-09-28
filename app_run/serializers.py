@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
 
-from .models import Run, Challenge, Position, CollectibleItem, Subscribe
+from .models import Run, Challenge, Position, CollectibleItem, Subscribe, Rating
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -17,6 +17,30 @@ class UserSerializer(serializers.ModelSerializer):
             return "coach"
 
         return "athlete"
+
+
+class RatingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Rating
+        fields = ["rater", "rated", "rating"]
+
+    def validate_rater(self, value):
+        if value.is_staff:
+            raise serializers.ValidationError("Рейтинг не может быть поставлен тренером")
+        else:
+            return value
+
+    def validate_rated(self, value):
+        if not value.is_staff:
+            raise serializers.ValidationError("Рейтинг может быть поставлен только тренеру")
+        else:
+            return value
+
+    def validate_rating(self, value):
+        if value < 1 or value > 5:
+            raise serializers.ValidationError("Рейтинг должен быть в пределах от 1 до 5")
+        else:
+            return value
 
 
 class AthleteSerializer(serializers.ModelSerializer):

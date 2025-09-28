@@ -14,10 +14,10 @@ import openpyxl
 from geopy.distance import geodesic
 from django_filters.rest_framework import DjangoFilterBackend
 
-from .models import Run, AthleteInfo, Challenge, Position, CollectibleItem, Subscribe
+from .models import Run, AthleteInfo, Challenge, Position, CollectibleItem, Subscribe, Rating
 from .serializers import RunSerializer, UserSerializer, UserDetailSerializer, CoachDetailSerializer, ChallengeSerializer, \
     PositionSerializer, \
-    CollectibleItemSerializer
+    CollectibleItemSerializer, RatingSerializer
 from .utils import create_challenge, check_weight, calculate_distance
 
 
@@ -339,3 +339,49 @@ class SubscribeToCoachView(APIView):
             return Response({
                 "message": "Подписка оформлена"
             })
+
+
+class RateCoachView(APIView):
+    def post(self, request, coach_id):
+        athlete_id = request.data.get("athlete")
+        rating = request.data.get("rating")
+
+        if not athlete_id:
+            return Response({
+                "message": "Не указан id атлета"
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        if not rating:
+            return Response({
+                "message": "Не указана оценка тренера"
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        data = {
+            "rater": athlete_id,
+            "rated": coach_id,
+            "rating": rating
+        }
+        serializer = RatingSerializer(data=data)
+
+        if serializer.is_valid():
+            athlete = User.objects.get(pk=athlete_id, is_staff=False)
+            coach = User.objects.get(pk=coach_id)
+
+            if not Subscribe.objects.filter(subscriber=athlete, subscribed_to=coach).exists():
+                return Response({
+                    "message": "Подписка на тренера не оформлена"
+                }, status=status.HTTP_400_BAD_REQUEST)
+
+            _, created = Rating.objects.update_or_create(rater=athlete,
+                                                         rated=coach,
+                                                         defaults={"rating": rating})
+            if created:
+                return Response({
+                    "message": "Оценка отправлена"
+                })
+            else:
+                return Response({
+                    "message": "Оценка изменена"
+                })
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
