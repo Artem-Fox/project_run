@@ -365,6 +365,10 @@ class RateCoachView(APIView):
 
         try:
             coach = User.objects.get(pk=coach_id)
+            if not coach.is_staff:
+                return Response({
+                    "message": "Этот пользователь не является тренером",
+                }, status=status.HTTP_400_BAD_REQUEST)
         except User.DoesNotExist:
             return Response({
                 "message": "Тренер не найден"
