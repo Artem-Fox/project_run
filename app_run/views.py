@@ -372,7 +372,7 @@ class RateCoachView(APIView):
         except User.DoesNotExist:
             return Response({
                 "message": "Атлет не найден"
-            }, status=status.HTTP_400_BAD_REQUEST)
+            }, status=status.HTTP_404_NOT_FOUND)
 
         data = {
             "rater": athlete_id,
