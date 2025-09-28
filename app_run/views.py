@@ -356,6 +356,20 @@ class RateCoachView(APIView):
                 "message": "Не указана оценка тренера"
             }, status=status.HTTP_400_BAD_REQUEST)
 
+        try:
+            athlete = User.objects.get(pk=athlete_id, is_staff=False)
+        except User.DoesNotExist:
+            return Response({
+                "message": "Атлет не найден"
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            coach = User.objects.get(pk=coach_id)
+        except User.DoesNotExist:
+            return Response({
+                "message": "Тренер не найден"
+            }, status=status.HTTP_404_NOT_FOUND)
+
         data = {
             "rater": athlete_id,
             "rated": coach_id,
@@ -364,9 +378,6 @@ class RateCoachView(APIView):
         serializer = RatingSerializer(data=data)
 
         if serializer.is_valid():
-            athlete = User.objects.get(pk=athlete_id, is_staff=False)
-            coach = User.objects.get(pk=coach_id)
-
             if not Subscribe.objects.filter(subscriber=athlete, subscribed_to=coach).exists():
                 return Response({
                     "message": "Подписка на тренера не оформлена"
