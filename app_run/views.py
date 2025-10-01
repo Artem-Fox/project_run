@@ -403,3 +403,47 @@ class RateCoachView(APIView):
                 return Response(serializer.data)
             else:
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class CoachAnalyticsView(APIView):
+    def get(self, request, coach_id):
+        data = {
+            "longest_run_user": None,
+            "longest_run_value": None,
+            "total_run_user": None,
+            "total_run_value": None,
+            "speed_avg_user": None,
+            "speed_avg_value": None
+        }
+
+        athletes = User.objects.filter(subscribers__subscribed_to_id=coach_id).annotate(
+            runs_finished=Count("runs", filter=Q(runs__status="finished")),
+            longest_run_distance=Max("runs__distance", filter=Q(runs__status="finished")),
+            total_runs_distance=Sum("runs__distance", filter=Q(runs__status="finished")),
+            avg_speed=Avg("runs__speed", filter=Q(runs__status="finished"))
+        )
+
+        if athletes.exists():
+            max_values = athletes.aggregate(
+                max_run_distance=Max("longest_run_distance"),
+                max_runs=Max("runs_finished"),
+                max_avg_speed=Max("avg_speed")
+            )
+
+            longest_run_value = max_values.get("max_run_distance")
+            longest_run_user = athletes.filter(runs__distance=longest_run_value).first().id
+            data["longest_run_user"] = longest_run_user
+            data["longest_run_value"] = longest_run_value
+
+            max_runs = max_values.get("max_runs")
+            total_run_user = athletes.filter(runs_finished=max_runs).first().id
+            total_run_value = athletes.filter(id=total_run_user).first().total_runs_distance
+            data["total_run_user"] = total_run_user
+            data["total_run_value"] = total_run_value
+
+            speed_avg_value = max_values.get("max_avg_speed")
+            speed_avg_user = athletes.filter(avg_speed=speed_avg_value).first().id
+            data["speed_avg_user"] = speed_avg_user
+            data["speed_avg_value"] = speed_avg_value
+
+        return Response(data)

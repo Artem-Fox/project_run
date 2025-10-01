@@ -24,7 +24,7 @@ from debug_toolbar.toolbar import debug_toolbar_urls
 
 from app_run.views import company_details_view, RunViewSet, UserViewSet, RunStartView, RunStopView, AthleteInfoView, ChallengeListView, \
     ChallengeSummaryView, \
-    PositionViewSet, CollectibleItemView, UploadCollectibleItemView, SubscribeToCoachView, RateCoachView
+    PositionViewSet, CollectibleItemView, UploadCollectibleItemView, SubscribeToCoachView, RateCoachView, CoachAnalyticsView
 
 router = DefaultRouter()
 router.register("runs", RunViewSet)
@@ -43,7 +43,8 @@ urlpatterns = [
     path("api/collectible_item/", CollectibleItemView.as_view()),
     path("api/upload_file/", UploadCollectibleItemView.as_view()),
     path("api/subscribe_to_coach/<int:coach_id>/", SubscribeToCoachView.as_view()),
-    path("api/rate_coach/<int:coach_id>/", RateCoachView.as_view())
+    path("api/rate_coach/<int:coach_id>/", RateCoachView.as_view()),
+    path("api/analytics_for_coach/<int:coach_id>/", CoachAnalyticsView.as_view()),
 ]
 
 if settings.DEBUG:
