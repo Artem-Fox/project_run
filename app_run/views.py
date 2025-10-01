@@ -107,7 +107,10 @@ class RunStopView(APIView):
 
 
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = User.objects.exclude(is_superuser=True).order_by("id").annotate(runs_finished=Count("runs", filter=Q(runs__status="finished")))
+    queryset = User.objects.exclude(is_superuser=True).order_by("id").annotate(
+        runs_finished=Count("runs", filter=Q(runs__status="finished")),
+        avg_rating=Avg("rated_by__rating")
+    )
     serializer_class = UserSerializer
     pagination_class = SizePagination
     filter_backends = [SearchFilter, OrderingFilter]

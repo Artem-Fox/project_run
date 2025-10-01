@@ -8,7 +8,7 @@ from .models import Run, Challenge, Position, CollectibleItem, Subscribe, Rating
 class UserSerializer(serializers.ModelSerializer):
     type = serializers.SerializerMethodField()
     runs_finished = serializers.IntegerField()
-    rating = serializers.SerializerMethodField()
+    rating = serializers.FloatField(source="avg_rating", read_only=True)
 
     class Meta:
         model = User
@@ -19,10 +19,6 @@ class UserSerializer(serializers.ModelSerializer):
             return "coach"
 
         return "athlete"
-
-    def get_rating(self, obj):
-        avg_rating = Rating.objects.filter(rated=obj).aggregate(avg_rating=Avg("rating"))["avg_rating"]
-        return avg_rating
 
 
 class RatingSerializer(serializers.ModelSerializer):
