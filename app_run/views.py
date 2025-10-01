@@ -364,6 +364,11 @@ class RateCoachView(APIView):
                 "message": "Атлет не найден"
             }, status=status.HTTP_400_BAD_REQUEST)
 
+        if not Subscribe.objects.filter(subscriber=athlete, subscribed_to=coach).exists():
+            return Response({
+                "message": "Подписка на тренера не оформлена"
+            }, status=status.HTTP_400_BAD_REQUEST)
+
         if not athlete_id:
             return Response({
                 "message": "Не указан id атлета"
@@ -374,29 +379,24 @@ class RateCoachView(APIView):
                 "message": "Не указана оценка тренера"
             }, status=status.HTTP_400_BAD_REQUEST)
 
-        data = {
-            "rater": athlete_id,
-            "rated": coach_id,
-            "rating": rating
-        }
-        serializer = RatingSerializer(data=data)
-
-        if serializer.is_valid():
-            if not Subscribe.objects.filter(subscriber=athlete, subscribed_to=coach).exists():
-                return Response({
-                    "message": "Подписка на тренера не оформлена"
-                }, status=status.HTTP_400_BAD_REQUEST)
-
-            _, created = Rating.objects.update_or_create(rater=athlete,
-                                                         rated=coach,
-                                                         defaults={"rating": rating})
-            if created:
-                return Response({
-                    "message": "Оценка отправлена"
-                })
+        rate = Rating.objects.filter(rater=athlete, rated=coach).first()
+        if rate:
+            serializer = RatingSerializer(rate, data={"rating": rating}, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
             else:
-                return Response({
-                    "message": "Оценка изменена"
-                })
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            data = {
+                "rater": athlete_id,
+                "rated": coach_id,
+                "rating": rating
+            }
+
+            serializer = RatingSerializer(data=data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
